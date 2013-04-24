@@ -36,8 +36,6 @@ import java.util.Set;
  */
 public class PRED_add_owner_approval_3 extends Predicate.P3 {
 
-  private static final SymbolTerm CODE_REVIEW = SymbolTerm.intern("Code-Review");
-
   private static final SymbolTerm OWNER_APPROVAL = SymbolTerm.intern("Owner-Approval");
 
   // Cached path owners.
@@ -119,15 +117,13 @@ public class PRED_add_owner_approval_3 extends Predicate.P3 {
    * @return set of reviewer emails
    */
   private static Set<String> getReviewerEmails(Prolog engine, ListTerm list) {
-    StructureTerm codeReviewTerm = new StructureTerm("label", CODE_REVIEW, new IntegerTerm(2));
-    VariableTerm userIdTerm = new VariableTerm();
+    VariableTerm userIdTerm = new VariableTerm(engine);
     StructureTerm userTerm = new StructureTerm("user", userIdTerm);
-    StructureTerm commitLabelTerm = new StructureTerm("commit_label", codeReviewTerm, userTerm);
 
     Set<String> result = new HashSet<String>();
     while (true) {
       StructureTerm term = (StructureTerm) list.car();
-      if (commitLabelTerm.unify(term, engine.trail)) {
+      if (userTerm.unify(term, engine.trail)) {
         int userId = ((IntegerTerm) userIdTerm.dereference()).intValue();
         IdentifiedUser user = getUser(engine, userId);
         result.addAll(user.getEmailAddresses());

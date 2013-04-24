@@ -39,7 +39,7 @@ Here’s a sample rules.pl that uses this predicate to enable the submit rule.
 submit_rule(S) :-
   gerrit:default_submit(D),
   D =.. [submit | Ds],
-  gerrit:get_commit_labels(L),
-  gerrit_owners:add_owner_approval(L, Ds, A),
+  findall(U, gerrit:commit_label(label('Code-Review', 2), U), Approvers),
+  gerrit_owners:add_owner_approval(Approvers, Ds, A),
   S =.. [submit | A].
 ```
