@@ -35,6 +35,9 @@ import java.util.Set;
 public class PathOwnersStoredValue extends StoredValue<SetMultimap<String, String>> {
   private static final Logger log = LoggerFactory.getLogger(IdentifiedUser.class);
 
+  // Cached path owners.
+  public static PathOwnersStoredValue VALUE = new PathOwnersStoredValue();
+
   @Override
   protected SetMultimap<String, String> createValue(Prolog engine) {
     PatchList patchList = StoredValues.PATCH_LIST.get(engine);

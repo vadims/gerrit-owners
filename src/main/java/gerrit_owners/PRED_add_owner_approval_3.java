@@ -38,9 +38,6 @@ public class PRED_add_owner_approval_3 extends Predicate.P3 {
 
   private static final SymbolTerm OWNER_APPROVAL = SymbolTerm.intern("Owner-Approval");
 
-  // Cached path owners.
-  private static PathOwnersStoredValue PATH_OWNERS = new PathOwnersStoredValue();
-
   public PRED_add_owner_approval_3(Term a1, Term a2, Term a3, Operation n) {
     arg1 = a1;
     arg2 = a2;
@@ -52,7 +49,7 @@ public class PRED_add_owner_approval_3 extends Predicate.P3 {
   public Operation exec(Prolog engine) throws PrologException {
     engine.setB0();
 
-    SetMultimap<String, String> pathOwners = PATH_OWNERS.get(engine);
+    SetMultimap<String, String> pathOwners = PathOwnersStoredValue.VALUE.get(engine);
 
     Term a1 = arg1.dereference();
     Term a2 = arg2.dereference();
