@@ -6,18 +6,14 @@ package com.vmware.gerrit.owners;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import com.google.gerrit.reviewdb.client.Account;
 import com.google.gerrit.reviewdb.client.Patch;
-import com.google.gerrit.rules.PrologEnvironment;
-import com.google.gerrit.rules.StoredValue;
-import com.google.gerrit.rules.StoredValues;
-import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.account.AccountResolver;
 import com.google.gerrit.server.patch.PatchList;
 import com.google.gerrit.server.patch.PatchListEntry;
 import com.google.gwtorm.server.OrmException;
-import com.googlecode.prolog_cafe.lang.Prolog;
 import com.googlecode.prolog_cafe.lang.SystemException;
 import org.eclipse.jgit.lib.Repository;
 import org.gitective.core.BlobUtils;
@@ -27,60 +23,55 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Path Owners Stored Value.
- * <p/>
- * Cached by the Prolog Engine across rule evaluation. Provides a mapping of OWNERS file referenced by the commit to
- * a set of emails contained in the OWNERS file.
- */
-public class PathOwnersStoredValue extends StoredValue<SetMultimap<String, Account.Id>> {
-  private static final Logger log = LoggerFactory.getLogger(IdentifiedUser.class);
+public class PathOwners {
 
-  // Cached path owners.
-  public static PathOwnersStoredValue VALUE = new PathOwnersStoredValue();
+  private static final Logger log = LoggerFactory.getLogger(PathOwners.class);
 
-  @Override
-  protected SetMultimap<String, Account.Id> createValue(Prolog engine) {
-    PatchList patchList = StoredValues.PATCH_LIST.get(engine);
-    List<PatchListEntry> patches = patchList.getPatches();
-    Set<String> paths = new HashSet<String>();
-    for (PatchListEntry patch : patches) {
-      // Ignore commit message
-      if (!patch.getNewName().equals("/COMMIT_MSG")) {
-        paths.add(patch.getNewName());
+  private final SetMultimap<String, Account.Id> owners;
 
-        // If a file was moved then we need approvals for old and new path
-        if (patch.getChangeType() == Patch.ChangeType.RENAMED) {
-          paths.add(patch.getOldName());
-        }
-      }
-    }
+  private final Repository repository;
 
-    PrologEnvironment env = (PrologEnvironment) engine.control;
-    AccountResolver resolver = env.getInjector().getInstance(AccountResolver.class);
+  private final AccountResolver resolver;
 
-    Repository repository = StoredValues.REPOSITORY.get(engine);
-    return getOwners(repository, resolver, paths);
+  private final PatchList patchList;
+
+  public PathOwners(Repository repository, AccountResolver resolver, PatchList patchList) {
+    this.repository = repository;
+    this.resolver = resolver;
+    this.patchList = patchList;
+
+    owners = Multimaps.unmodifiableSetMultimap(fetchOwners());
   }
 
-  private SetMultimap<String, Account.Id> getOwners(Repository repository,
-                                                    AccountResolver resolver,
-                                                    Set<String> paths) {
+  /**
+   * Returns a read only view of the paths to owners mapping.
+   *
+   * @return multimap of paths to owners
+   */
+  public SetMultimap<String, Account.Id> get() {
+    return owners;
+  }
 
+  /**
+   * Fetched the owners for the associated patch list.
+   *
+   * @return multimap of paths to owners
+   */
+  private SetMultimap<String, Account.Id> fetchOwners() {
     SetMultimap<String, Account.Id> result = HashMultimap.create();
     Map<String, PathOwnersEntry> entries = new HashMap<String, PathOwnersEntry>();
 
     PathOwnersEntry rootEntry = new PathOwnersEntry();
-    OwnersConfig rootConfig = getOwners(repository, "OWNERS");
+    OwnersConfig rootConfig = getOwners("OWNERS");
     if (rootConfig != null) {
       rootEntry.setOwnersPath("OWNERS");
-      rootEntry.addOwners(getOwnersFromEmails(resolver, rootConfig.getOwners()));
+      rootEntry.addOwners(getOwnersFromEmails(rootConfig.getOwners()));
     }
 
+    Set<String> paths = getModifiedPaths();
     for (String path : paths) {
       String[] parts = path.split("/");
 
@@ -96,11 +87,11 @@ public class PathOwnersStoredValue extends StoredValue<SetMultimap<String, Accou
         // Skip if we already parsed this path
         if (!entries.containsKey(partial)) {
           String ownersPath = partial + "OWNERS";
-          OwnersConfig config = getOwners(repository, ownersPath);
+          OwnersConfig config = getOwners(ownersPath);
           if (config != null) {
             PathOwnersEntry entry = new PathOwnersEntry();
             entry.setOwnersPath(ownersPath);
-            entry.addOwners(getOwnersFromEmails(resolver, config.getOwners()));
+            entry.addOwners(getOwnersFromEmails(config.getOwners()));
 
             if (config.isInherited()) {
               entry.addOwners(currentEntry.getOwners());
@@ -122,13 +113,33 @@ public class PathOwnersStoredValue extends StoredValue<SetMultimap<String, Accou
   }
 
   /**
+   * Parses the patch list for any paths that were modified.
+   *
+   * @return set of modified paths.
+   */
+  private Set<String> getModifiedPaths() {
+    Set<String> paths = new HashSet<String>();
+    for (PatchListEntry patch : patchList.getPatches()) {
+      // Ignore commit message
+      if (!patch.getNewName().equals("/COMMIT_MSG")) {
+        paths.add(patch.getNewName());
+
+        // If a file was moved then we need approvals for old and new path
+        if (patch.getChangeType() == Patch.ChangeType.RENAMED) {
+          paths.add(patch.getOldName());
+        }
+      }
+    }
+    return paths;
+  }
+
+  /**
    * Returns the parsed OwnersConfig file for the given path if it exists.
    *
-   * @param repository git repo
    * @param ownersPath path to OWNERS file in the git repo
    * @return config or null if it doesn't exist
    */
-  private OwnersConfig getOwners(Repository repository, String ownersPath) {
+  private OwnersConfig getOwners(String ownersPath) {
     String owners = BlobUtils.getContent(repository, "master", ownersPath);
 
     if (owners != null) {
@@ -146,11 +157,10 @@ public class PathOwnersStoredValue extends StoredValue<SetMultimap<String, Accou
 
   /**
    * Translates emails to Account.Ids.
-   * @param resolver account resolver
    * @param emails emails to translate
    * @return set of account ids
    */
-  private Set<Account.Id> getOwnersFromEmails(AccountResolver resolver, Set<String> emails) {
+  private Set<Account.Id> getOwnersFromEmails(Set<String> emails) {
     Set<Account.Id> result = new HashSet<Account.Id>();
     for (String email : emails) {
       try {

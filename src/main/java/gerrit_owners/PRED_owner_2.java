@@ -3,9 +3,9 @@
  */
 package gerrit_owners;
 
-import com.vmware.gerrit.owners.PathOwnersStoredValue;
+import com.vmware.gerrit.owners.OwnersStoredValues;
+import com.vmware.gerrit.owners.PathOwners;
 
-import com.google.common.collect.SetMultimap;
 import com.google.gerrit.reviewdb.client.Account;
 import com.googlecode.prolog_cafe.lang.IntegerTerm;
 import com.googlecode.prolog_cafe.lang.JavaObjectTerm;
@@ -40,10 +40,10 @@ public class PRED_owner_2 extends Predicate.P2 {
     engine.cont = cont;
     engine.setB0();
 
-    SetMultimap<String, Account.Id> owners = PathOwnersStoredValue.VALUE.get(engine);
+    PathOwners owners = OwnersStoredValues.PATH_OWNERS.get(engine);
     engine.areg1 = arg1;
     engine.areg2 = arg2;
-    engine.areg3 = new JavaObjectTerm(owners.entries().iterator());
+    engine.areg3 = new JavaObjectTerm(owners.get().entries().iterator());
     return engine.jtry3(OWNER_CHECK, OWNER_NEXT);
   }
 
