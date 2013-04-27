@@ -3,16 +3,18 @@
  */
 package com.vmware.gerrit.owners;
 
+import com.google.gerrit.reviewdb.client.Account;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 public class PathOwnersEntry {
   private String ownersPath;
-  private Set<String> owners;
+  private Set<Account.Id> owners;
 
   public PathOwnersEntry() {
-    owners = new HashSet<String>();
+    owners = new HashSet<Account.Id>();
   }
 
   public String getOwnersPath() {
@@ -23,11 +25,11 @@ public class PathOwnersEntry {
     this.ownersPath = ownersPath;
   }
 
-  public Set<String> getOwners() {
+  public Set<Account.Id> getOwners() {
     return owners;
   }
 
-  public void addOwners(Collection<String> owners) {
+  public void addOwners(Collection<Account.Id> owners) {
     this.owners.addAll(owners);
   }
 }

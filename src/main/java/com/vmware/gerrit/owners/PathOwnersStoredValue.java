@@ -7,13 +7,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import com.google.gerrit.reviewdb.client.Account;
 import com.google.gerrit.reviewdb.client.Patch;
+import com.google.gerrit.rules.PrologEnvironment;
 import com.google.gerrit.rules.StoredValue;
 import com.google.gerrit.rules.StoredValues;
 import com.google.gerrit.server.IdentifiedUser;
+import com.google.gerrit.server.account.AccountResolver;
 import com.google.gerrit.server.patch.PatchList;
 import com.google.gerrit.server.patch.PatchListEntry;
+import com.google.gwtorm.server.OrmException;
 import com.googlecode.prolog_cafe.lang.Prolog;
+import com.googlecode.prolog_cafe.lang.SystemException;
 import org.eclipse.jgit.lib.Repository;
 import org.gitective.core.BlobUtils;
 import org.slf4j.Logger;
@@ -32,14 +37,14 @@ import java.util.Set;
  * Cached by the Prolog Engine across rule evaluation. Provides a mapping of OWNERS file referenced by the commit to
  * a set of emails contained in the OWNERS file.
  */
-public class PathOwnersStoredValue extends StoredValue<SetMultimap<String, String>> {
+public class PathOwnersStoredValue extends StoredValue<SetMultimap<String, Account.Id>> {
   private static final Logger log = LoggerFactory.getLogger(IdentifiedUser.class);
 
   // Cached path owners.
   public static PathOwnersStoredValue VALUE = new PathOwnersStoredValue();
 
   @Override
-  protected SetMultimap<String, String> createValue(Prolog engine) {
+  protected SetMultimap<String, Account.Id> createValue(Prolog engine) {
     PatchList patchList = StoredValues.PATCH_LIST.get(engine);
     List<PatchListEntry> patches = patchList.getPatches();
     Set<String> paths = new HashSet<String>();
@@ -55,19 +60,25 @@ public class PathOwnersStoredValue extends StoredValue<SetMultimap<String, Strin
       }
     }
 
+    PrologEnvironment env = (PrologEnvironment) engine.control;
+    AccountResolver resolver = env.getInjector().getInstance(AccountResolver.class);
+
     Repository repository = StoredValues.REPOSITORY.get(engine);
-    return getOwners(repository, paths);
+    return getOwners(repository, resolver, paths);
   }
 
-  private SetMultimap<String, String> getOwners(Repository repository, Set<String> paths) {
-    SetMultimap<String, String> result = HashMultimap.create();
+  private SetMultimap<String, Account.Id> getOwners(Repository repository,
+                                                    AccountResolver resolver,
+                                                    Set<String> paths) {
+
+    SetMultimap<String, Account.Id> result = HashMultimap.create();
     Map<String, PathOwnersEntry> entries = new HashMap<String, PathOwnersEntry>();
 
     PathOwnersEntry rootEntry = new PathOwnersEntry();
     OwnersConfig rootConfig = getOwners(repository, "OWNERS");
     if (rootConfig != null) {
       rootEntry.setOwnersPath("OWNERS");
-      rootEntry.addOwners(rootConfig.getOwners());
+      rootEntry.addOwners(getOwnersFromEmails(resolver, rootConfig.getOwners()));
     }
 
     for (String path : paths) {
@@ -89,7 +100,7 @@ public class PathOwnersStoredValue extends StoredValue<SetMultimap<String, Strin
           if (config != null) {
             PathOwnersEntry entry = new PathOwnersEntry();
             entry.setOwnersPath(ownersPath);
-            entry.addOwners(config.getOwners());
+            entry.addOwners(getOwnersFromEmails(resolver, config.getOwners()));
 
             if (config.isInherited()) {
               entry.addOwners(currentEntry.getOwners());
@@ -104,10 +115,7 @@ public class PathOwnersStoredValue extends StoredValue<SetMultimap<String, Strin
         }
       }
 
-      // Only add the path to the OWNERS file to reduce the number of entries in the result
-      if (currentEntry.getOwnersPath() != null) {
-        result.putAll(currentEntry.getOwnersPath(), currentEntry.getOwners());
-      }
+      result.putAll(path, currentEntry.getOwners());
     }
 
     return result;
@@ -134,5 +142,24 @@ public class PathOwnersStoredValue extends StoredValue<SetMultimap<String, Strin
     }
 
     return null;
+  }
+
+  /**
+   * Translates emails to Account.Ids.
+   * @param resolver account resolver
+   * @param emails emails to translate
+   * @return set of account ids
+   */
+  private Set<Account.Id> getOwnersFromEmails(AccountResolver resolver, Set<String> emails) {
+    Set<Account.Id> result = new HashSet<Account.Id>();
+    for (String email : emails) {
+      try {
+        Set<Account.Id> ids = resolver.findAll(email);
+        result.addAll(ids);
+      } catch (OrmException e) {
+        throw new SystemException(e.getMessage());
+      }
+    }
+    return result;
   }
 }
