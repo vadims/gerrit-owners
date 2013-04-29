@@ -43,3 +43,8 @@ submit_rule(S) :-
   gerrit_owners:add_owner_approval(Approvers, Ds, A),
   S =.. [submit | A].
 ```
+
+## Auto assigner
+
+There is a second plugin, `gerrit-owners-autoassign` which depends on `gerrit-owners`. It will automatically assign
+all of the owners to review a change when it's created or updated.
