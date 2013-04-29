@@ -7,13 +7,35 @@ Copyright (c) 2013 VMware, Inc. All Rights Reserved.
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.vmware.gerrit</groupId>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
+
+  <groupId>com.github.vadims</groupId>
   <artifactId>gerrit-owners-parent</artifactId>
   <packaging>pom</packaging>
   <version>1.0-SNAPSHOT</version>
 
   <name>gerrit-owners-parent</name>
+  <description>Parent project of gerrit-owners and gerrit-owners-autoassign.</description>
   <url>http://github.com/vadims/gerrit-owners</url>
+
+  <developers>
+    <developer>
+      <name>Vadim Spivak</name>
+      <email>vadim@spivak.net</email>
+      <organization>VMware, Inc.</organization>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
 
   <scm>
     <connection>scm:git:git@github.com:vadims/gerrit-owners.git</connection>
@@ -90,6 +112,7 @@ Copyright (c) 2013 VMware, Inc. All Rights Reserved.
         <artifactId>maven-release-plugin</artifactId>
         <version>2.4.1</version>
         <configuration>
+          <pushChanges>false</pushChanges>
           <tagNameFormat>v@{project.version}</tagNameFormat>
         </configuration>
       </plugin>
@@ -139,16 +162,4 @@ Copyright (c) 2013 VMware, Inc. All Rights Reserved.
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <repositories>
-    <repository>
-      <id>gerrit-api-repository-snapshot</id>
-      <url>https://gerrit-api.commondatastorage.googleapis.com/snapshot/</url>
-    </repository>
-
-    <repository>
-      <id>gerrit-api-repository-release</id>
-      <url>https://gerrit-api.commondatastorage.googleapis.com/release/</url>
-    </repository>
-  </repositories>
 </project>
