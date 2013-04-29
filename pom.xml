@@ -15,6 +15,12 @@ Copyright (c) 2013 VMware, Inc. All Rights Reserved.
   <name>gerrit-owners-parent</name>
   <url>http://github.com/vadims/gerrit-owners</url>
 
+  <scm>
+    <connection>scm:git:git@github.com:vadims/gerrit-owners.git</connection>
+    <url>scm:git:git@github.com:vadims/gerrit-owners.git</url>
+    <developerConnection>scm:git:git@github.com:vadims/gerrit-owners.git</developerConnection>
+  </scm>
+
   <properties>
     <Gerrit-ApiType>plugin</Gerrit-ApiType>
     <Gerrit-ApiVersion>2.6-SNAPSHOT</Gerrit-ApiVersion>
@@ -28,7 +34,7 @@ Copyright (c) 2013 VMware, Inc. All Rights Reserved.
   </properties>
 
   <modules>
-    <module>gerrit-owners</module>    
+    <module>gerrit-owners</module>
     <module>gerrit-owners-autoassign</module>
     <module>gerrit-owners-common</module>
   </modules>
@@ -77,6 +83,12 @@ Copyright (c) 2013 VMware, Inc. All Rights Reserved.
           <target>1.6</target>
           <encoding>UTF-8</encoding>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.4.1</version>
       </plugin>
     </plugins>
   </build>
@@ -127,8 +139,13 @@ Copyright (c) 2013 VMware, Inc. All Rights Reserved.
 
   <repositories>
     <repository>
-      <id>gerrit-api-repository</id>
+      <id>gerrit-api-repository-snapshot</id>
       <url>https://gerrit-api.commondatastorage.googleapis.com/snapshot/</url>
+    </repository>
+
+    <repository>
+      <id>gerrit-api-repository-release</id>
+      <url>https://gerrit-api.commondatastorage.googleapis.com/release/</url>
     </repository>
   </repositories>
 </project>
