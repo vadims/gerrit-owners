@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013 VMware, Inc. All Rights Reserved.
  */
-package com.vmware.gerrit.owners.autoassigner;
+package com.vmware.gerrit.owners.autoassign;
 
 import com.vmware.gerrit.owners.PathOwners;
 
