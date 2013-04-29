@@ -8,6 +8,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.extensions.annotations.Listen;
 import com.google.gerrit.rules.PredicateProvider;
 
+/**
+ * Gerrit OWNERS Prolog Predicate Provider.
+ */
 @Listen
 public class OwnerPredicateProvider implements PredicateProvider {
   @Override

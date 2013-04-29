@@ -26,19 +26,23 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Calculates the owners of a patch list.
+ */
+// TODO(vspivak): provide assisted factory
 public class PathOwners {
 
   private static final Logger log = LoggerFactory.getLogger(PathOwners.class);
 
   private final SetMultimap<String, Account.Id> owners;
 
-  private final Repository repository;
-
   private final AccountResolver resolver;
+
+  private final Repository repository;
 
   private final PatchList patchList;
 
-  public PathOwners(Repository repository, AccountResolver resolver, PatchList patchList) {
+  public PathOwners(AccountResolver resolver, Repository repository, PatchList patchList) {
     this.repository = repository;
     this.resolver = resolver;
     this.patchList = patchList;

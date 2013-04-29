@@ -9,7 +9,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public class PathOwnersEntry {
+/**
+ * Path Owners Entry.
+ * <p/>
+ * Used internally by PathOwners to represent and compute the owners at a specific path.
+ */
+class PathOwnersEntry {
   private String ownersPath;
   private Set<Account.Id> owners;
 

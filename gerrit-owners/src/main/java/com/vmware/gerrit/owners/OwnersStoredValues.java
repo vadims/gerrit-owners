@@ -25,7 +25,7 @@ public class OwnersStoredValues {
       PrologEnvironment env = (PrologEnvironment) engine.control;
       AccountResolver resolver = env.getInjector().getInstance(AccountResolver.class);
 
-      return new PathOwners(repository, resolver, patchList);
+      return new PathOwners(resolver, repository, patchList);
     }
   };
 
