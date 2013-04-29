@@ -14,7 +14,7 @@ Copyright (c) 2013 VMware, Inc. All Rights Reserved.
   <groupId>com.github.vadims</groupId>
   <artifactId>gerrit-owners-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.1</version>
 
   <name>gerrit-owners-parent</name>
   <description>Parent project of gerrit-owners and gerrit-owners-autoassign.</description>
@@ -39,7 +39,7 @@ Copyright (c) 2013 VMware, Inc. All Rights Reserved.
     <connection>scm:git:git@github.com:vadims/gerrit-owners.git</connection>
     <url>scm:git:git@github.com:vadims/gerrit-owners.git</url>
     <developerConnection>scm:git:git@github.com:vadims/gerrit-owners.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>v1.1</tag>
   </scm>
 
   <properties>
