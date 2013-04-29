@@ -28,8 +28,9 @@ Copyright (c) 2013 VMware, Inc. All Rights Reserved.
   </properties>
 
   <modules>
-    <module>gerrit-owners</module>
+    <module>gerrit-owners</module>    
     <module>gerrit-owners-autoassign</module>
+    <module>gerrit-owners-common</module>
   </modules>
 
   <build>

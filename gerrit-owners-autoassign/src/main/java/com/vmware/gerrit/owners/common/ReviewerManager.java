@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013 VMware, Inc. All Rights Reserved.
  */
-package com.vmware.gerrit.owners.autoassign;
+package com.vmware.gerrit.owners.common;
 
 import com.google.gerrit.common.errors.EmailException;
 import com.google.gerrit.extensions.restapi.RestApiException;

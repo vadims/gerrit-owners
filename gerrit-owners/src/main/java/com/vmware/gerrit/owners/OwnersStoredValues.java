@@ -3,12 +3,16 @@
  */
 package com.vmware.gerrit.owners;
 
+import com.vmware.gerrit.owners.common.PathOwners;
+
 import com.google.gerrit.rules.PrologEnvironment;
 import com.google.gerrit.rules.StoredValue;
 import com.google.gerrit.rules.StoredValues;
 import com.google.gerrit.server.account.AccountResolver;
 import com.google.gerrit.server.patch.PatchList;
+import com.google.gwtorm.server.OrmException;
 import com.googlecode.prolog_cafe.lang.Prolog;
+import com.googlecode.prolog_cafe.lang.SystemException;
 import org.eclipse.jgit.lib.Repository;
 
 /**
@@ -25,7 +29,11 @@ public class OwnersStoredValues {
       PrologEnvironment env = (PrologEnvironment) engine.control;
       AccountResolver resolver = env.getInjector().getInstance(AccountResolver.class);
 
-      return new PathOwners(resolver, repository, patchList);
+      try {
+        return new PathOwners(resolver, repository, patchList);
+      } catch (OrmException e) {
+        throw new SystemException(e.getMessage());
+      }
     }
   };
 

@@ -4,7 +4,7 @@
 package gerrit_owners;
 
 import com.vmware.gerrit.owners.OwnersStoredValues;
-import com.vmware.gerrit.owners.PathOwners;
+import com.vmware.gerrit.owners.common.PathOwners;
 
 import com.google.gerrit.reviewdb.client.Account;
 import com.googlecode.prolog_cafe.lang.IntegerTerm;

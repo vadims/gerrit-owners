@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013 VMware, Inc. All Rights Reserved.
  */
-package com.vmware.gerrit.owners;
+package com.vmware.gerrit.owners.common;
 
 import com.google.gerrit.reviewdb.client.Account;
 

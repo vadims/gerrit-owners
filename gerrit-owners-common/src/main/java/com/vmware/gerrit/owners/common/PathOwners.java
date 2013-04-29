@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013 VMware, Inc. All Rights Reserved.
  */
-package com.vmware.gerrit.owners;
+package com.vmware.gerrit.owners.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -14,7 +14,6 @@ import com.google.gerrit.server.account.AccountResolver;
 import com.google.gerrit.server.patch.PatchList;
 import com.google.gerrit.server.patch.PatchListEntry;
 import com.google.gwtorm.server.OrmException;
-import com.googlecode.prolog_cafe.lang.SystemException;
 import org.eclipse.jgit.lib.Repository;
 import org.gitective.core.BlobUtils;
 import org.slf4j.Logger;
@@ -42,7 +41,7 @@ public class PathOwners {
 
   private final PatchList patchList;
 
-  public PathOwners(AccountResolver resolver, Repository repository, PatchList patchList) {
+  public PathOwners(AccountResolver resolver, Repository repository, PatchList patchList) throws OrmException {
     this.repository = repository;
     this.resolver = resolver;
     this.patchList = patchList;
@@ -64,7 +63,7 @@ public class PathOwners {
    *
    * @return multimap of paths to owners
    */
-  private SetMultimap<String, Account.Id> fetchOwners() {
+  private SetMultimap<String, Account.Id> fetchOwners() throws OrmException {
     SetMultimap<String, Account.Id> result = HashMultimap.create();
     Map<String, PathOwnersEntry> entries = new HashMap<String, PathOwnersEntry>();
 
@@ -164,15 +163,11 @@ public class PathOwners {
    * @param emails emails to translate
    * @return set of account ids
    */
-  private Set<Account.Id> getOwnersFromEmails(Set<String> emails) {
+  private Set<Account.Id> getOwnersFromEmails(Set<String> emails) throws OrmException {
     Set<Account.Id> result = new HashSet<Account.Id>();
     for (String email : emails) {
-      try {
-        Set<Account.Id> ids = resolver.findAll(email);
-        result.addAll(ids);
-      } catch (OrmException e) {
-        throw new SystemException(e.getMessage());
-      }
+      Set<Account.Id> ids = resolver.findAll(email);
+      result.addAll(ids);
     }
     return result;
   }

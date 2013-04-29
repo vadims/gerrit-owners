@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013 VMware, Inc. All Rights Reserved.
  */
-package com.vmware.gerrit.owners.autoassign;
+package com.vmware.gerrit.owners.common;
 
 public class ReviewerManagerException extends Exception {
   public ReviewerManagerException(String message) {

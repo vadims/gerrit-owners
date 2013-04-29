@@ -1,9 +1,7 @@
 /*
  * Copyright (c) 2013 VMware, Inc. All Rights Reserved.
  */
-package com.vmware.gerrit.owners.autoassign;
-
-import com.vmware.gerrit.owners.PathOwners;
+package com.vmware.gerrit.owners.common;
 
 import com.google.gerrit.extensions.annotations.Listen;
 import com.google.gerrit.extensions.events.GitReferenceUpdatedListener;
