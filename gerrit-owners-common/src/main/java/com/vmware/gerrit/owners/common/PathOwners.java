@@ -109,7 +109,10 @@ public class PathOwners {
         }
       }
 
-      result.putAll(path, currentEntry.getOwners());
+      // Only add the path to the OWNERS file to reduce the number of entries in the result
+      if (currentEntry.getOwnersPath() != null) {
+        result.putAll(currentEntry.getOwnersPath(), currentEntry.getOwners());
+      }
     }
 
     return result;

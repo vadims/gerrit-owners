@@ -5,26 +5,16 @@
 :- public add_owner_approval/3.
 
 add_owner_approval(In, Out) :-
-  gerrit:commit_delta('.*', Type, Path, OldPath),
-  ( Type == 'rename',
-    owner(OldPath, _),
-    \+ owner_approved(OldPath);
-    owner(Path, _),
-    \+ owner_approved(Path)
-  ),
+  owner_path(Path),
+  \+ owner_approved(Path),
   Out = [label('Owner-Approval', need(_)) | In],
   !.
 
 add_owner_approval(In, Out) :- In = Out.
 
 add_owner_approval(Users, In, Out) :-
-  gerrit:commit_delta('.*' ,Type, Path, OldPath),
-  ( Type == 'rename',
-    owner(OldPath, _),
-    \+ owner_approved(Users, OldPath);
-    owner(Path, _),
-    \+ owner_approved(Users, Path)
-  ),
+  owner_path(Path),
+  \+ owner_approved(Users, Path),
   Out = [label('Owner-Approval', need(_)) | In],
   !.
 

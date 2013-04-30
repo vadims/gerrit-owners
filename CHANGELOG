@@ -1,3 +1,9 @@
+1.2 - ???
+=====================
+
+* Add owner_path(-Path) to use instead of gerrit:commit_delta
+* Change owner(-Path, _) to bind to the OWNERS file(s) path instead of patch list paths
+
 1.1 - April 29, 2013
 =====================
 
