@@ -5,7 +5,6 @@ JACKSON_REV = '2.1.1'
 maven_jar(
   name = 'jackson-core',
   id = 'com.fasterxml.jackson.core:jackson-core:%s' % JACKSON_REV,
-  #bin_sha1 = '82ad1c5f92f6dcc6291f5c46ebacb975eaa844de',
   license = 'Apache2.0',
 )
 
@@ -33,33 +32,46 @@ maven_jar(
   license = 'Apache2.0',
 )
 
+EXTERNAL_DEPS = [
+  ':gitective-core',
+  ':jackson-core',
+  ':jackson-databind',
+  ':jackson-annotations',
+  ':jackson-dataformat-yaml',
+]
+
 java_library(
-  name = 'base-prolog-rules',
+  name = 'gerrit-owners-common-lib',
   srcs = glob([
     'gerrit-owners-common/src/main/java/**/*.java',
+  ]),
+  deps = [
+    '//:plugin-lib',
+  ] + EXTERNAL_DEPS,
+)
+
+java_library(
+  name = 'gerrit-owners-lib',
+  srcs = glob([
     'gerrit-owners/src/main/java/**/*.java',
   ]),
   deps = [
+    ':gerrit-owners-common-lib',
+    '//:plugin-lib',
     '//lib/prolog:prolog-cafe',
     '//gerrit-server/src/main/prolog:common',
-    ':gitective-core',
-    ':jackson-core',
-    ':jackson-databind',
-    ':jackson-annotations',
-    ':jackson-dataformat-yaml',
-    '//:plugin-lib',
-  ],
+  ] + EXTERNAL_DEPS,
 )
 
 prolog_cafe_library(
-  name = 'owners-prolog-rules',
+  name = 'gerrit-owners-prolog-rules',
   srcs = glob(['gerrit-owners/src/main/prolog/*.pl']),
   deps = [
     '//gerrit-server/src/main/prolog:common',
-    ':base-prolog-rules',
+    ':gerrit-owners-lib',
   ],
 )
-  
+
 gerrit_plugin(
   name = 'owners',
   srcs = [],
@@ -69,6 +81,21 @@ gerrit_plugin(
     'Gerrit-PluginName: owners',
   ],
   deps = [
-    ':owners-prolog-rules',
+    ':gerrit-owners-prolog-rules',
+  ] + EXTERNAL_DEPS,
+)
+
+gerrit_plugin(
+  name = 'owners-autoassign',
+  srcs = glob([
+    'gerrit-owners-autoassign/src/main/java/**/*.java',
+  ]),
+  manifest_entries = [
+    'Implementation-Title: Gerrit OWNERS autoassign plugin',
+    'Implementation-URL: https://github.com/vadims/gerrit-owners',
+    'Gerrit-PluginName: owners-autoassign',
   ],
+  deps = [
+    ':gerrit-owners-common-lib',
+  ] + EXTERNAL_DEPS,
 )

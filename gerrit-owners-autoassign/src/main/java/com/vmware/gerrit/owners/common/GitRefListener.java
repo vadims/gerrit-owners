@@ -63,7 +63,7 @@ public class GitRefListener implements GitReferenceUpdatedListener {
     try {
       repository = repositoryManager.openRepository(Project.NameKey.parse(projectName));
       try {
-        processUpdates(repository, event.getUpdates());
+        processEvent(repository, event);
       } finally {
         repository.close();
       }
@@ -72,30 +72,28 @@ public class GitRefListener implements GitReferenceUpdatedListener {
     }
   }
 
-  private void processUpdates(Repository repository, List<Update> updates) {
-    for (Update update : updates) {
-      if (update.getRefName().startsWith(CHANGES_REF)) {
-        Change.Id id = Change.Id.fromRef(update.getRefName());
-        try {
-          Change change = db.get().changes().get(id);
-          PatchList patchList = getPatchList(update, change);
-          if (patchList != null) {
-            PathOwners owners = new PathOwners(accountResolver, repository, patchList);
-            reviewerManager.addReviewers(change, owners.get().values());
-          }
-        } catch (OrmException e) {
-          logger.warn("Could not open change: {}", id, e);
-        } catch (ReviewerManagerException e) {
-          logger.warn("Could not add reviewers for change: {}", id, e);
+  private void processEvent(Repository repository, Event event) {
+    if (event.getRefName().startsWith(CHANGES_REF)) {
+      Change.Id id = Change.Id.fromRef(event.getRefName());
+      try {
+        Change change = db.get().changes().get(id);
+        PatchList patchList = getPatchList(event, change);
+        if (patchList != null) {
+          PathOwners owners = new PathOwners(accountResolver, repository, patchList);
+          reviewerManager.addReviewers(change, owners.get().values());
         }
+      } catch (OrmException e) {
+        logger.warn("Could not open change: {}", id, e);
+      } catch (ReviewerManagerException e) {
+        logger.warn("Could not add reviewers for change: {}", id, e);
       }
     }
   }
 
-  private PatchList getPatchList(Update update, Change change) {
+  private PatchList getPatchList(Event event, Change change) {
     ObjectId newId = null;
-    if (update.getNewObjectId() != null) {
-      newId = ObjectId.fromString(update.getNewObjectId());
+    if (event.getNewObjectId() != null) {
+      newId = ObjectId.fromString(event.getNewObjectId());
     }
 
     PatchListKey plKey = new PatchListKey(change.getProject(), null, newId, IGNORE_NONE);

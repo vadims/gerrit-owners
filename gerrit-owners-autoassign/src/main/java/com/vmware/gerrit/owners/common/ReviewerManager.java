@@ -17,6 +17,7 @@ import com.google.gwtorm.server.OrmException;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+import java.io.IOException;
 import java.util.Collection;
 
 @Singleton
@@ -57,6 +58,8 @@ public class ReviewerManager {
     } catch (EmailException e) {
       throw new ReviewerManagerException(e);
     } catch (OrmException e) {
+      throw new ReviewerManagerException(e);
+    } catch (IOException e) {
       throw new ReviewerManagerException(e);
     }
   }
