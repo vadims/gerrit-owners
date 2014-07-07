@@ -14,11 +14,15 @@ import com.google.gwtorm.server.OrmException;
 import com.googlecode.prolog_cafe.lang.Prolog;
 import com.googlecode.prolog_cafe.lang.SystemException;
 import org.eclipse.jgit.lib.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * StoredValues for the Gerrit OWNERS plugin.
  */
 public class OwnersStoredValues {
+  private static final Logger log = LoggerFactory.getLogger(OwnersStoredValues.class);
 
   public static StoredValue<PathOwners> PATH_OWNERS;
 
@@ -27,6 +31,7 @@ public class OwnersStoredValues {
     if (PATH_OWNERS != null) {
       return;
     }
+    log.error("Initializing OwnerStoredValues");
     PATH_OWNERS = new StoredValue<PathOwners>() {
       @Override
       protected PathOwners createValue(Prolog engine) {
