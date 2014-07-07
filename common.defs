@@ -1,0 +1,51 @@
+include_defs('//lib/maven.defs')
+include_defs('//lib/prolog/prolog.defs')
+
+JACKSON_REV = '2.1.1'
+maven_jar(
+  name = 'jackson-core',
+  id = 'com.fasterxml.jackson.core:jackson-core:%s' % JACKSON_REV,
+  license = 'Apache2.0',
+)
+
+maven_jar(
+  name = 'jackson-databind',
+  id = 'com.fasterxml.jackson.core:jackson-databind:%s' % JACKSON_REV,
+  license = 'Apache2.0',
+)
+
+maven_jar(
+  name = 'jackson-annotations',
+  id = 'com.fasterxml.jackson.core:jackson-annotations:%s' % JACKSON_REV,
+  license = 'Apache2.0',
+)
+
+maven_jar(
+  name = 'jackson-dataformat-yaml',
+  id = 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:%s' % JACKSON_REV,
+  license = 'Apache2.0',
+)
+
+maven_jar(
+  name = 'gitective-core',
+  id = 'org.gitective:gitective-core:0.9.9',
+  license = 'Apache2.0',
+)
+
+EXTERNAL_DEPS = [
+  ':gitective-core',
+  ':jackson-core',
+  ':jackson-databind',
+  ':jackson-annotations',
+  ':jackson-dataformat-yaml',
+]
+
+# These are dependencies that must be made available to the plugins' libraries at compilation
+# time, but should not be included in the plugins' jar files since they will be provided
+# by the gerrit server jar.
+# For this reason all the intermediate java libraries that we build are java_library2 targets
+# rather than java_library.
+COMPILE_DEPS = [
+  '//:plugin-lib',
+  '//lib/prolog:prolog-cafe',
+]
