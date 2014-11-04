@@ -1,4 +1,6 @@
 include_defs('//plugins/gerrit-owners/common.defs')
+include_defs('//lib/maven.defs')
+include_defs('//lib/prolog/prolog.defs')
 
 gerrit_plugin(
   name = 'owners-autoassign',

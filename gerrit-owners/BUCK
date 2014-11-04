@@ -1,21 +1,20 @@
 include_defs('//plugins/gerrit-owners/common.defs')
+include_defs('//lib/maven.defs')
+include_defs('//lib/prolog/prolog.defs')
 
 # buck is unhappy to build a gerrit_plugin with no source files.
 # On the other side, gerrit-owners-prolog-rules needs to be built after all the java files have been
 # compiled. For this reason we have a stub class that has no content and just makes buck happy.
 COMPILE_STUB = ['src/main/java/com/vmware/gerrit/owners/CompileStub.java']
 
-java_library2(
+java_library(
   name = 'gerrit-owners-lib',
   srcs = glob([
     'src/main/java/**/*.java',
   ], excludes=COMPILE_STUB),
   deps = [
     '//plugins/gerrit-owners/gerrit-owners-common:common',
-  ],
-  # Notice that we put EXTERNAL_DEPS as compile_deps to prevent double inclusion in the owners
-  # plugin.
-  compile_deps = COMPILE_DEPS + EXTERNAL_DEPS,
+  ] + COMPILE_DEPS + EXTERNAL_DEPS,
 )
 
 prolog_cafe_library(
