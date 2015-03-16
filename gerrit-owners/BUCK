@@ -33,6 +33,7 @@ gerrit_plugin(
     'Implementation-Title: Gerrit OWNERS plugin',
     'Implementation-URL: https://github.com/vadims/gerrit-owners',
     'Gerrit-PluginName: owners',
+    'Gerrit-Module: com.vmware.gerrit.owners.OwnersModule',
   ],
   deps = [
     ':gerrit-owners-lib',
